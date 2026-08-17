@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interativo - Governança e Compliance em T.I.</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #090d16;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* BANNER HEADER (QUANDO ATIVO) */
+        .user-header-bar {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: -35px -35px 25px -35px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .user-info-display {
+            display: flex;
+            gap: 20px;
+            font-size: 0.95rem;
+        }
+
+        .user-info-badge {
+            background: rgba(37, 99, 235, 0.2);
+            border: 1px solid rgba(37, 99, 235, 0.4);
+            padding: 6px 14px;
+            border-radius: 30px;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .stats-badge-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-tag {
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-tag.correct {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .stat-tag.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* FORMULARIO INICIAL */
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-screen h1 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #60a5fa, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-screen p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+        }
+
+        /* BOTÕES PRINCIPAIS */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ÁREA DAS QUESTÕES */
+        .quiz-screen {
+            display: none;
+        }
+
+        .top-quiz-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-tracker {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .timer-box {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-box.urgent {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #f87171;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn-option {
+            padding: 18px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: rgba(30, 41, 59, 0.8);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+        }
+
+        .btn-option:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(6, 182, 212, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-option.selected-certo {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+            color: #34d399;
+        }
+
+        .btn-option.selected-errado {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: #f87171;
+        }
+
+        .btn-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* CAIXA DE FEEDBACK */
+        .feedback-box {
+            display: none;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-box.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+
+        .feedback-box.danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* TELA DE RESULTADOS */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, rgba(15,23,42,0.8) 100%);
+            border: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px auto;
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .score-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        /* TELA DE REVISÃO COMPLETA */
+        .review-screen {
+            display: none;
+        }
+
+        .review-header {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .review-item.item-correct {
+            border-left: 5px solid var(--success);
+        }
+
+        .review-item.item-wrong {
+            border-left: 5px solid var(--danger);
+        }
+
+        .review-q-num {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .review-q-text {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: #f1f5f9;
+        }
+
+        .review-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .review-badge {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .review-badge.user-ans {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .review-badge.correct-ans {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .review-explanation {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .user-header-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .options-container { grid-template-columns: 1fr; }
+            .results-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- HEADER DE USUÁRIO E PLACAR -->
+        <div class="user-header-bar" id="headerBar" style="display: none;">
+            <div class="user-info-display">
+                <span class="user-info-badge" id="displayStudentName">Aluno: -</span>
+                <span class="user-info-badge" id="displayStudentClass">Turma: -</span>
+            </div>
+            <div class="stats-badge-container">
+                <span class="stat-tag correct">✓ CERTAS: <span id="statCorrect">0</span></span>
+                <span class="stat-tag wrong">✗ ERRADAS: <span id="statWrong">0</span></span>
+            </div>
+        </div>
+
+        <!-- TELA 1: CADASTRO INICIAL -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1>🚀 Quiz de Governança & Compliance em T.I.</h1>
+            <p>Seja bem-vindo(a) à atividade prática! Teste seus conhecimentos em 50 questões no formato <strong>CERTO</strong> ou <strong>ERRADO</strong>. Preencha seus dados abaixo para começar.</p>
+            
+            <form id="startForm" onsubmit="event.preventDefault(); startQuiz();">
+                <div class="input-group">
+                    <label for="studentName">Seu nome (ou como prefere ser chamado):</label>
+                    <input type="text" id="studentName" placeholder="Ex: Lucas Silva" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="studentClass">Sua turma / curso:</label>
+                    <input type="text" id="studentClass" placeholder="Ex: 3º Ano B - Informática para Internet" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Iniciar Quiz do Conhecimento ➔</button>
+            </form>
+        </div>
+
+        <!-- TELA 2: QUIZ INTERATIVO -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="top-quiz-bar">
+                <span class="question-tracker" id="questionTracker">Questão 1 de 50</span>
+                <div class="timer-box" id="timerBox">
+                    ⏱️ <span id="timerDisplay">02:00</span>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text" id="questionText">Carregando pergunta...</p>
+            </div>
+
+            <div class="options-container" id="optionsContainer">
+                <button class="btn-option" id="btnCerto" onclick="selectAnswer('CERTO')">CERTO</button>
+                <button class="btn-option" id="btnErrado" onclick="selectAnswer('ERRADO')">ERRADO</button>
+            </div>
+
+            <!-- FEEDBACK EM TEMPO REAL -->
+            <div class="feedback-box" id="feedbackBox">
+                <div class="feedback-title" id="feedbackTitle"></div>
+                <div id="feedbackText"></div>
+            </div>
+
+            <button class="btn-primary" id="btnNext" style="display: none;" onclick="nextQuestion()">Próxima Questão ➔</button>
+        </div>
+
+        <!-- TELA 3: RESULTADOS FINAIS -->
+        <div class="results-screen" id="resultsScreen">
+            <h1 style="margin-bottom: 10px;">Mandou bem! Quiz Concluído 🎉</h1>
+            <p style="color: var(--text-muted); margin-bottom: 25px;" id="resultsGreeting">Confira abaixo o seu desempenho geral:</p>
+
+            <div class="score-circle">
+                <span class="score-number" id="finalScore">0/50</span>
+                <span class="score-label">Aproveitamento</span>
+            </div>
+
+            <div id="performanceMessage" style="margin-bottom: 25px; font-size: 1.1rem; font-weight: 600;"></div>
+
+            <div class="results-actions">
+                <button class="btn-secondary" onclick="restartQuiz()">🔄 Refazer Quiz</button>
+                <button class="btn-primary" style="width: auto;" onclick="showReviewScreen()">📋 Ver Todas as 50 Respostas & Feedbacks</button>
+            </div>
+        </div>
+
+        <!-- TELA 4: REVISÃO DE TODAS AS QUESTÕES -->
+        <div class="review-screen" id="reviewScreen">
+            <div class="review-header">
+                <h2>📋 Revisão Completa das Questões</h2>
+                <button class="btn-secondary" onclick="backToResults()">← Voltar ao Resumo</button>
+            </div>
+            <div id="reviewContainer">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-primary" style="width: auto;" onclick="restartQuiz()">🔄 Reiniciar Quiz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // BANCO DE DADOS DAS 50 QUESTÕES (BASEADO ESTRITAMENTE NO DOCUMENTO ANEXADO)
+        const quizQuestions = [{"id": 1, "text": "Tecnologia da Informação (T.I.) engloba o conjunto de todas as ferramentas, sistemas e recursos de computação utilizados para criar, processar, armazenar, proteger e trocar informações.", "answer": "CERTO", "explanation": "Exatamente! Conforme visto nas páginas iniciais do slide, a T.I. engloba todas as ferramentas, sistemas e recursos de computação para gerenciar e proteger dados."}, {"id": 2, "text": "O pilar do Hardware na T.I. refere-se exclusivamente aos programas, sistemas operacionais e bancos de dados utilizados pelas empresas.", "answer": "ERRADO", "explanation": "Cuidado! Os programas, sistemas operacionais e bancos de dados pertencem ao pilar do Software. O Hardware representa a parte física, como computadores, servidores e roteadores."}, {"id": 3, "text": "O pilar de Redes na T.I. é a infraestrutura responsável por conectar os dispositivos entre si, incluindo internet, Wi-Fi e redes internas.", "answer": "CERTO", "explanation": "Perfeito! A infraestrutura de redes é o pilar que garante a conexão e comunicação entre todos os dispositivos."}, {"id": 4, "text": "O pilar de Gestão de Dados e Segurança abrange os processos para organizar a informação e mantê-la a salvo de acessos não autorizados.", "answer": "CERTO", "explanation": "Mandou bem! Esse pilar cuida justamente da organização estratégica dos dados e da proteção contra acessos indevidos."}, {"id": 5, "text": "Uma das funções práticas da Tecnologia da Informação nas empresas é substituir totalmente o julgamento humano, eliminando a necessidade de tomadas de decisão estratégicas por gestores.", "answer": "ERRADO", "explanation": "A T.I. apoia a tomada de decisão através de dados e relatórios, mas não substitui a estratégia e a governança dos gestores."}, {"id": 6, "text": "Governança em T.I. é o conjunto de regras, processos e decisões que garante que a área de TI esteja alinhada aos objetivos da empresa, administrando a TI para gerar valor ao negócio.", "answer": "CERTO", "explanation": "Isso aí! Governança significa administrar corretamente a T.I. para que ela sirva aos objetivos estratégicos da organização."}, {"id": 7, "text": "Em um cenário sem governança de T.I., ao receber verba para modernizar um laboratório, cada setor compra equipamentos diferentes e incompatíveis, podendo esgotar o orçamento sem concluir o projeto.", "answer": "CERTO", "explanation": "Correto! Esse é um exemplo clássico apresentado no material sobre como a falta de governança gera desperdício e desorganização."}, {"id": 8, "text": "Com a implantação de Governança em T.I., o uso e a instalação de qualquer programa pelos funcionários são liberados sem restrições, para aumentar a produtividade individual.", "answer": "ERRADO", "explanation": "Atenção! Permitir que qualquer um instale softwares traz vírus, programas piratas e vazamentos. Com Governança, apenas softwares autorizados pela T.I. são instalados."}, {"id": 9, "text": "Governança em T.I. pode ser resumida de forma direta e simples pela expressão: 'Administrar corretamente'.", "answer": "CERTO", "explanation": "Exato! Enquanto Compliance é cumprir as regras, Governança é administrar a T.I. do jeito certo."}, {"id": 10, "text": "Um dos principais objetivos da Governança em T.I. é otimizar recursos e gerenciar riscos, além de criar valor para o negócio.", "answer": "CERTO", "explanation": "Boa! Os 4 pilares/objetivos da Governança listados no documento são: criar valor, gerenciar riscos, otimizar recursos e garantir conformidade."}, {"id": 11, "text": "A definição de políticas e diretrizes e a supervisão de desempenho são papéis fundamentais da Governança em T.I.", "answer": "CERTO", "explanation": "Certíssimo! Cabe à Governança criar as regras (políticas) e acompanhar se a T.I. está trazendo os resultados esperados."}, {"id": 12, "text": "Se uma empresa permite que softwares sem licença sejam instalados livremente nos computadores de trabalho, isso demonstra uma prática sólida de Governança e Compliance.", "answer": "ERRADO", "explanation": "Nada disso! Instalar programas piratas expõe a empresa a vírus e sanções legais. A governança exige o uso de softwares licenciados ou livres e legalizados."}, {"id": 13, "text": "Compliance em T.I. refere-se ao cumprimento de leis, normas, políticas e regulamentos relacionados ao uso da tecnologia, garantindo conformidade legal e interna.", "answer": "CERTO", "explanation": "Exato! Compliance vem do inglês 'to comply' e significa estar em conformidade com leis, regulamentos e regras."}, {"id": 14, "text": "Compliance em T.I. pode ser resumido de forma direta pela ideia de: 'Cumprir as regras'.", "answer": "CERTO", "explanation": "Perfeito! Guarde essa associação: Governança = Administrar corretamente | Compliance = Cumprir as regras."}, {"id": 15, "text": "Uma loja virtual que segue a LGPD (Lei Geral de Proteção de Dados), colhendo autorização dos clientes e restringindo acessos internos aos dados, está atuando com Compliance.", "answer": "CERTO", "explanation": "Corretíssimo! Respeitar a privacidade do usuário e atender aos requisitos da LGPD é uma obrigação direta de Compliance."}, {"id": 16, "text": "O uso de sistemas operacionais e softwares gratuitos/livres, como Linux e LibreOffice, viola os princípios de Compliance por não envolver a aquisição de licenças pagas.", "answer": "ERRADO", "explanation": "Falso! Softwares livres e de código aberto como Linux e LibreOffice são totalmente legais e autorizados, sendo ótimas opções de Compliance."}, {"id": 17, "text": "Se uma empresa compartilha dados cadastrais de seus clientes com parceiros sem o consentimento dos titulares, ela está agindo em estrita conformidade com o Compliance.", "answer": "ERRADO", "explanation": "Erro grave! Compartilhar dados pessoais sem autorização fere a LGPD e viola diretamente o Compliance."}, {"id": 18, "text": "Garantir o cumprimento de normas de segurança e diretrizes legais evita que a empresa sofra multas pesadas e danos à sua reputação.", "answer": "CERTO", "explanation": "Com certeza! A conformidade (Compliance) protege a empresa contra penalidades administrativas, judiciais e perda de confiança no mercado."}, {"id": 19, "text": "Embora tenham funções diferentes, a Governança e o Compliance trabalham juntos para garantir o uso correto, eficiente e seguro da T.I.", "answer": "CERTO", "explanation": "Exatamente! Governança orienta a gestão e alinhamento de TI, e o Compliance garante o respeito às normas e leis."}, {"id": 20, "text": "A automação de processos via T.I. permite que tarefas repetitivas sejam executadas por sistemas, reduzindo o tempo de atendimento e a ocorrência de erros humanos.", "answer": "CERTO", "explanation": "Correto! A automação substitui trabalhos manuais cansativos, trazendo rapidez e precisão para a operação."}, {"id": 21, "text": "A integração de sistemas de T.I. impede que diferentes setores da empresa, como financeiro, vendas e estoque, compartilhem dados entre si.", "answer": "ERRADO", "explanation": "Ao contrário! A integração serve exatamente para conectar diferentes setores, permitindo que troquem dados em tempo real."}, {"id": 22, "text": "Dashboards de T.I. que exibem dados sobre disponibilidade de servidores e chamados abertos auxiliam os gestores na tomada de decisões mais rápidas e precisas.", "answer": "CERTO", "explanation": "Exato! Painéis gráficos e indicadores atualizados são ferramentas essenciais para tomadas de decisão embasadas em fatos."}, {"id": 23, "text": "Ferramentas de comunicação digital, como o Microsoft Teams, exemplificam como a T.I. viabiliza a troca instantânea de informações entre equipes e fornecedores.", "answer": "CERTO", "explanation": "Boa! Plataformas de comunicação corporativa encurtam distâncias e otimizam a colaboração."}, {"id": 24, "text": "A migração para a computação em nuvem tende a aumentar os gastos fixos com papel e obriga a empresa a manter toda a sua estrutura física de servidores no local.", "answer": "ERRADO", "explanation": "Falso! A nuvem reduz custos com infraestrutura física local e elimina a necessidade de pilhas de papel e deslocamentos."}, {"id": 25, "text": "A T.I. possibilita a criação de novos modelos de negócios, como aplicativos e lojas virtuais, para oferecer serviços que antes dependiam do atendimento presencial.", "answer": "CERTO", "explanation": "Perfeito! A transformação digital abre espaço para novos produtos, serviços online e plataformas digitais."}, {"id": 26, "text": "À medida que a tecnologia se torna mais presente nas operações empresariais, diminui a necessidade de estabelecer regras de governança e segurança.", "answer": "ERRADO", "explanation": "Muito pelo contrário! Quanto mais dependente da tecnologia a empresa fica, mais VITAL se torna a criação de regras rigorosas de segurança e governança."}, {"id": 27, "text": "Bancos de dados corporativos organizam e armazenam dados de clientes, produtos e transações, garantindo consultas rápidas e estruturadas.", "answer": "CERTO", "explanation": "Certíssimo! O banco de dados é a espinha dorsal do armazenamento organizado em T.I."}, {"id": 28, "text": "Vazamentos de dados, ataques cibernéticos, fraudes e interrupções indesejadas nos sistemas são riscos sérios enfrentados por empresas sem governança adequada.", "answer": "CERTO", "explanation": "Exato! A ausência de controle deixa a infraestrutura vulnerável a diversos incidentes graves."}, {"id": 29, "text": "Em 2016, a Uber sofreu um incidente em que dados de cerca de 57 milhões de usuários foram expostos e pagou US$ 100 mil aos hackers para ocultar o vazamento.", "answer": "CERTO", "explanation": "Correto! Esse caso real do material ilustra como esconder um incidente viola o compliance e gerou uma multa posterior de US$ 148 milhões."}, {"id": 30, "text": "O megavazamento de dados registrado no Brasil em janeiro de 2021 expôs informações pessoais ligadas a cerca de 223 milhões de CPFs.", "answer": "CERTO", "explanation": "Infelizmente verdadeiro! Conhecido como 'vazamento do fim do mundo', atingiu dados de pessoas vivas e falecidas."}, {"id": 31, "text": "A técnica de Phishing consiste na criação de mensagens e páginas clonadas com o objetivo de enganar usuários e roubar suas credenciais de acesso e senhas.", "answer": "CERTO", "explanation": "Perfeito! Phishing é um dos golpes cibernéticos mais comuns e perigosos da internet."}, {"id": 32, "text": "O apagão cibernético global que afetou sistemas Windows provocando a 'tela azul da morte' (BSOD) foi provocado por uma atualização defeituosa da empresa de segurança CrowdStrike.", "answer": "CERTO", "explanation": "Correto! O caso CrowdStrike demonstrou na prática como um erro em software de segurança pode paralisar voos, bancos e hospitais no mundo todo."}, {"id": 33, "text": "O Google recebeu uma multa de US$ 57 milhões em 2019 na União Europeia por desrespeitar diretrizes do regulamento de proteção de dados GDPR.", "answer": "CERTO", "explanation": "Exato! O não cumprimento de legislações como o GDPR gera punições milionárias até para gigantes da tecnologia."}, {"id": 34, "text": "Golpes do WhatsApp, falso boleto e cobranças via PIX falso não têm relação com segurança da informação ou conscientização de usuários.", "answer": "ERRADO", "explanation": "Incorreto! A conscientização e o controle de segurança em T.I. são fundamentais para combater essas fraudes sociais e financeiras."}, {"id": 35, "text": "Ocultar um vazamento de dados pagando resgate a criminosos é recomendado pela Governança de T.I. como boa prática para preservar a imagem da empresa.", "answer": "ERRADO", "explanation": "Jamais! Esconder vazamentos viola a transparência, o Compliance e as leis de proteção de dados, piorando muito as penalidades."}, {"id": 36, "text": "Gestão de Riscos é o processo de prever o que pode dar errado nos sistemas de T.I. e elaborar planos para evitar o problema ou diminuir o seu impacto.", "answer": "CERTO", "explanation": "Exatamente! Trata-se de mapear ameaças com antecedência e planejar ações mitigatórias."}, {"id": 37, "text": "Identificar que a queda de um servidor local de vendas causará prejuízos financeiros por minuto parado é uma etapa do processo de Gestão de Riscos.", "answer": "CERTO", "explanation": "Mandou bem! Essa etapa é a identificação do problema e avaliação de seu impacto no negócio."}, {"id": 38, "text": "Mitigar um risco significa ignorar as falhas conhecidas até que o sistema colapse totalmente.", "answer": "ERRADO", "explanation": "Nada disso! Mitigar significa tomar medidas preventivas para diminuir a probabilidade ou o estrago de um problema."}, {"id": 39, "text": "Hospedar um sistema crítico em ambiente com redundância e gerador de energia é uma ação típica de mitigação de riscos de infraestrutura.", "answer": "CERTO", "explanation": "Perfeito! A redundância impede que uma única falha de energia tire a empresa do ar."}, {"id": 40, "text": "A Gestão de Riscos deve ser realizada apenas após a ocorrência de um desastre cibernético catastrófico.", "answer": "ERRADO", "explanation": "Falso! A Gestão de Riscos é essencialmente PREVENTIVA, realizada antes que os problemas aconteçam."}, {"id": 41, "text": "O conceito de Transparência na Governança de T.I. significa deixar claro para todos quem faz o quê, como os processos funcionam e qual é o status dos projetos e incidentes.", "answer": "CERTO", "explanation": "Exato! Sem regras escondidas e com justificativas claras para as decisões tomadas."}, {"id": 42, "text": "Quando um sistema sai do ar e a T.I. publica um comunicado sobre o ocorrido e depois divulga um relatório explicativo (post-mortem), está sendo praticada a Transparência.", "answer": "CERTO", "explanation": "Corretíssimo! Informar a causa e as soluções adotadas gera confiança entre a T.I. e as áreas de negócio."}, {"id": 43, "text": "Promover a transparência exige que decisões de segurança sejam mantidas em segredo absoluto até dos próprios funcionários encarregados da operação.", "answer": "ERRADO", "explanation": "Incorreto! A equipe precisa conhecer as responsabilidades, processos e diretrizes para atuar de forma alinhada."}, {"id": 44, "text": "Segurança da Informação busca garantir que apenas pessoas autorizadas tenham acesso aos dados e que informações confidenciais não sejam roubadas ou vazadas.", "answer": "CERTO", "explanation": "Perfeito! Os princípios de segurança visam manter a confidencialidade, integridade e disponibilidade das informações."}, {"id": 45, "text": "Armazenar planilhas de folha de pagamento em pastas compartilhadas públicas com senhas padrão é uma boa prática de Segurança da Informação.", "answer": "ERRADO", "explanation": "Jamais! Isso é uma grave vulnerabilidade. A Segurança exige controle de acesso e senhas fortes."}, {"id": 46, "text": "A aplicação do princípio do menor privilégio, o uso de Autenticação em Dois Fatores (2FA) e a Criptografia são mecanismos essenciais da Segurança da Informação.", "answer": "CERTO", "explanation": "Excelente! Essas três medidas reduzem drasticamente as chances de invasões e acessos não autorizados."}, {"id": 47, "text": "Auditoria e Controle envolvem verificar e acompanhar continuamente se a empresa está seguindo as regras, as melhores práticas e corrigindo falhas.", "answer": "CERTO", "explanation": "Exato! O controle estabelece a regra/ferramenta, e a auditoria verifica se ela está sendo cumprida."}, {"id": 48, "text": "Um script automático que compara semanalmente a lista de funcionários ativos do RH com os acessos ativos nos sistemas é um exemplo prático de Auditoria Contínua.", "answer": "CERTO", "explanation": "Perfeito! Esse processo automatizado garante que ex-funcionários não mantenham acessos indevidos aos sistemas."}, {"id": 49, "text": "Se um funcionário for desligado da empresa, a manutenção de suas contas ativas nos sistemas por tempo indeterminado não traz riscos ao Compliance ou à LGPD.", "answer": "ERRADO", "explanation": "Erro crasso! Ex-funcionários com acesso ativo podem vazar segredos ou dados de clientes, gerando multas severas e violação de Compliance."}, {"id": 50, "text": "Os quatro objetivos centrais da Governança em T.I. apresentados no curso são: Criar valor para o negócio, Gerenciar riscos, Otimizar recursos e Garantir conformidade.", "answer": "CERTO", "explanation": "Sensacional! Você fechou com chave de ouro: esses são exatamente os 4 objetivos estratégicos da Governança em T.I."}];
+
+        // ESTADO DA APLICAÇÃO
+        let currentQuestionIndex = 0;
+        let studentName = "";
+        let studentClass = "";
+        let scoreCorrect = 0;
+        let scoreWrong = 0;
+        let timerInterval = null;
+        let timeLeft = 120; // 2 minutos em segundos
+        let userAnswers = []; // guarda respostas do aluno
+
+        // ELEMENTOS DOM
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const reviewScreen = document.getElementById('reviewScreen');
+        const headerBar = document.getElementById('headerBar');
+
+        const displayStudentName = document.getElementById('displayStudentName');
+        const displayStudentClass = document.getElementById('displayStudentClass');
+        const statCorrect = document.getElementById('statCorrect');
+        const statWrong = document.getElementById('statWrong');
+
+        const questionTracker = document.getElementById('questionTracker');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerBox = document.getElementById('timerBox');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const questionText = document.getElementById('questionText');
+        const btnCerto = document.getElementById('btnCerto');
+        const btnErrado = document.getElementById('btnErrado');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackText = document.getElementById('feedbackText');
+        const btnNext = document.getElementById('btnNext');
+
+        // INICIAR QUIZ
+        function startQuiz() {
+            studentName = document.getElementById('studentName').value.trim();
+            studentClass = document.getElementById('studentClass').value.trim();
+
+            if (!studentName || !studentClass) return;
+
+            displayStudentName.innerText = "Aluno: " + studentName;
+            displayStudentClass.innerText = "Turma: " + studentClass;
+            headerBar.style.display = "flex";
+
+            welcomeScreen.style.display = "none";
+            quizScreen.style.display = "block";
+
+            currentQuestionIndex = 0;
+            scoreCorrect = 0;
+            scoreWrong = 0;
+            userAnswers = [];
+            updateStats();
+
+            loadQuestion();
+        }
+
+        // ATUALIZAR PLACAR
+        function updateStats() {
+            statCorrect.innerText = scoreCorrect;
+            statWrong.innerText = scoreWrong;
+        }
+
+        // CARREGAR QUESTÃO ATUAL
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            timeLeft = 120; // 2 minutos
+            updateTimerDisplay();
+            timerBox.classList.remove('urgent');
+
+            const q = quizQuestions[currentQuestionIndex];
+            questionTracker.innerText = `Questão ${currentQuestionIndex + 1} de ${quizQuestions.length}`;
+            questionText.innerText = q.text;
+
+            // Atualiza barra de progresso
+            const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+            progressBarFill.style.width = progress + "%";
+
+            // Reseta botões e feedback
+            btnCerto.disabled = false;
+            btnErrado.disabled = false;
+            btnCerto.className = "btn-option";
+            btnErrado.className = "btn-option";
+            feedbackBox.style.display = "none";
+            btnNext.style.display = "none";
+
+            // Inicia Cronômetro
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 30) {
+                    timerBox.classList.add('urgent');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // TRATAMENTO QUANDO O TEMPO ESGOTA
+        function handleTimeout() {
+            btnCerto.disabled = true;
+            btnErrado.disabled = true;
+
+            scoreWrong++;
+            updateStats();
+
+            const q = quizQuestions[currentQuestionIndex];
+            userAnswers.push({
+                questionId: q.id,
+                questionText: q.text,
+                userAnswer: "TEMPO_ESGOTADO",
+                correctAnswer: q.answer,
+                explanation: q.explanation,
+                isCorrect: false
+            });
+
+            feedbackBox.className = "feedback-box danger";
+            feedbackTitle.innerHTML = "⏰ Ops, " + studentName + "! Você NÃO respondeu no tempo determinado!";
+            feedbackText.innerHTML = `<strong>A resposta correta é: ${q.answer}</strong><br><br>${q.explanation}`;
+            feedbackBox.style.display = "block";
+
+            btnNext.style.display = "block";
+        }
+
+        // SELEÇÃO DE RESPOSTA (CERTO / ERRADO)
+        function selectAnswer(selected) {
+            clearInterval(timerInterval);
+            btnCerto.disabled = true;
+            btnErrado.disabled = true;
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = (selected === q.answer);
+
+            if (selected === 'CERTO') {
+                btnCerto.classList.add('selected-certo');
+            } else {
+                btnErrado.classList.add('selected-errado');
+            }
+
+            if (isCorrect) {
+                scoreCorrect++;
+                feedbackBox.className = "feedback-box success";
+                feedbackTitle.innerHTML = "🎉 Mandou bem, " + studentName + "! Resposta Exata!";
+                feedbackText.innerHTML = `<strong>Resposta Correta: ${q.answer}</strong><br><br>${q.explanation}`;
+            } else {
+                scoreWrong++;
+                feedbackBox.className = "feedback-box danger";
+                feedbackTitle.innerHTML = "❌ Quase lá, " + studentName + "! Não foi dessa vez.";
+                feedbackText.innerHTML = `<strong>Você marcou ${selected}, mas o correto é: ${q.answer}</strong><br><br>${q.explanation}`;
+            }
+
+            updateStats();
+
+            userAnswers.push({
+                questionId: q.id,
+                questionText: q.text,
+                userAnswer: selected,
+                correctAnswer: q.answer,
+                explanation: q.explanation,
+                isCorrect: isCorrect
+            });
+
+            feedbackBox.style.display = "block";
+            btnNext.style.display = "block";
+        }
+
+        // PRÓXIMA QUESTÃO OU FINALIZAR
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // FINALIZAR QUIZ E MOSTRAR RESULTADOS
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            quizScreen.style.display = "none";
+            resultsScreen.style.display = "block";
+            progressBarFill.style.width = "100%";
+
+            document.getElementById('finalScore').innerText = `${scoreCorrect}/${quizQuestions.length}`;
+            document.getElementById('resultsGreeting').innerText = `Parabéns pela dedicação, ${studentName} (${studentClass})!`;
+
+            const percentage = (scoreCorrect / quizQuestions.length) * 100;
+            const msgBox = document.getElementById('performanceMessage');
+
+            if (percentage >= 80) {
+                msgBox.style.color = "#34d399";
+                msgBox.innerText = `🏆 Excelente desempenho, ${studentName}! Você dominou os conceitos de Governança e Compliance! (${percentage.toFixed(0)}% de aproveitamento)`;
+            } else if (percentage >= 60) {
+                msgBox.style.color = "#fbbf24";
+                msgBox.innerText = `👍 Bom trabalho, ${studentName}! Você tem uma boa base, mas vale a pena revisar alguns conceitos. (${percentage.toFixed(0)}% de aproveitamento)`;
+            } else {
+                msgBox.style.color = "#f87171";
+                msgBox.innerText = `📚 Vale a pena revisar o conteúdo, ${studentName}! Refaça o quiz e leia atentamente os feedbacks. (${percentage.toFixed(0)}% de aproveitamento)`;
+            }
+        }
+
+        // MOSTRAR TELA DE REVISÃO COMPLETA
+        function showReviewScreen() {
+            resultsScreen.style.display = "none";
+            reviewScreen.style.display = "block";
+
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = "";
+
+            userAnswers.forEach((ans, index) => {
+                const item = document.createElement('div');
+                item.className = `review-item ${ans.isCorrect ? 'item-correct' : 'item-wrong'}`;
+
+                const userAnsText = ans.userAnswer === 'TEMPO_ESGOTADO' ? '⏰ Tempo Esgotado' : ans.userAnswer;
+
+                item.innerHTML = `
+                    <div class="review-q-num">Questão ${index + 1} - ${ans.isCorrect ? '✅ Acertou' : '❌ Errou'}</div>
+                    <div class="review-q-text">${ans.questionText}</div>
+                    <div class="review-meta">
+                        <span class="review-badge user-ans">Sua resposta: <strong>${userAnsText}</strong></span>
+                        <span class="review-badge correct-ans">Gabarito: <strong>${ans.correctAnswer}</strong></span>
+                    </div>
+                    <div class="review-explanation">💡 <strong>Feedback Pedagógico:</strong> ${ans.explanation}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function backToResults() {
+            reviewScreen.style.display = "none";
+            resultsScreen.style.display = "block";
+        }
+
+        function restartQuiz() {
+            reviewScreen.style.display = "none";
+            resultsScreen.style.display = "none";
+            welcomeScreen.style.display = "block";
+            headerBar.style.display = "none";
+            document.getElementById('startForm').reset();
+        }
+    </script>
+</body>
+</html>
